@@ -21,9 +21,9 @@ else:
 def load_config():
     default = defaultdict(str)
     default["nsfw"] = "False"
-    default["time"] = "day"
+    default["time"] = "1d"
     default["display"] = "0"
-    default["output"] = "Pictures/Wallpapers"
+    default["output"] = "~/Pictures/Wallpapers"
 
     config_path = os.path.expanduser("~/.config/change_wallpaper_haven.rc")
     section_name = "root"
@@ -45,8 +45,8 @@ def load_config():
                     ret[name] = fun(section_name, name)
                 except ValueError as e:
                     err_str = "Error in config file.  Variable '{}': {}. The default '{}' will be used."
-
-                    # print sys.stderr >> err_str.format(name, str(e), default[name])
+                    print(err_str)
+                    #print sys.stderr >> err_str.format(name, str(e), default[name])
                     ret[name] = default[name]
 
             add_to_ret(config.getboolean, "nsfw")
@@ -61,14 +61,20 @@ def load_config():
 
 config = load_config()
 
+def sorting(astring):
+    """ Validates the given parameter as being a valid sorting parameter for the API
+    """
+    if not astring in ['1d', '3d', '1w', '1M', '3M', '6M', '1y']:
+        raise ValueError
+    return astring
 
 def parse_args():
     """parse args with argparse
     :returns: args
     """
-    parser = argparse.ArgumentParser(description="Daily Reddit Wallpaper")
-    parser.add_argument("-t", "--time", type=str, default=config["time"],
-                        help="Example: new, hour, day, week, month, year")
+    parser = argparse.ArgumentParser(description="Daily Wallhaven Wallpaper")
+    parser.add_argument("-t", "--time", type=sorting, default=config["time"],
+                        help="Example: 1d, 3d, 1w, 1M, 3M, 6M, 1y")
     parser.add_argument("-n", "--nsfw", action='store_true', default=config["nsfw"], help="Enables NSFW tagged posts.")
     parser.add_argument("-d", "--display", type=int, default=config["display"],
                         help="Desktop display number on OS X (0: all displays, 1: main display, etc")
@@ -168,11 +174,13 @@ if __name__ == '__main__':
     if response.status_code == 200:
         # Get home directory and location where image will be saved
         # (default location for Ubuntu is used)
-        home_dir = os.path.expanduser('~')
+
+        if '~' in save_dir:
+            save_dir = save_dir.replace('~', os.path.expanduser('~'))
+
         image_id = image_url.split('/')[-1].split('.')[0]
         image_type = image_url.split('.')[-1]
-        save_location = "{home_dir}/{save_dir}/{id}.{image_type}".format(
-            home_dir=home_dir,
+        save_location = "{save_dir}/{id}.{image_type}".format(
             save_dir=save_dir,
             id=image_id,
             image_type=image_type
