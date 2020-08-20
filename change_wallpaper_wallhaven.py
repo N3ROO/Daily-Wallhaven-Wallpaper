@@ -4,9 +4,7 @@ from __future__ import unicode_literals
 import argparse
 import ctypes
 import os
-import praw
 import platform
-import re
 import requests
 import sys
 import time
@@ -22,13 +20,12 @@ else:
 
 def load_config():
     default = defaultdict(str)
-    default["subreddit"] = "wallpapers"
     default["nsfw"] = "False"
     default["time"] = "day"
     default["display"] = "0"
     default["output"] = "Pictures/Wallpapers"
 
-    config_path = os.path.expanduser("~/.config/change_wallpaper_reddit.rc")
+    config_path = os.path.expanduser("~/.config/change_wallpaper_haven.rc")
     section_name = "root"
     try:
         config = ConfigParser(default)
@@ -52,7 +49,6 @@ def load_config():
                     # print sys.stderr >> err_str.format(name, str(e), default[name])
                     ret[name] = default[name]
 
-            add_to_ret(config.get, "subreddit")
             add_to_ret(config.getboolean, "nsfw")
             add_to_ret(config.getint, "display")
             add_to_ret(config.get, "time")
@@ -71,8 +67,6 @@ def parse_args():
     :returns: args
     """
     parser = argparse.ArgumentParser(description="Daily Reddit Wallpaper")
-    parser.add_argument("-s", "--subreddit", type=str, default=config["subreddit"],
-                        help="Example: art, getmotivated, wallpapers, ...")
     parser.add_argument("-t", "--time", type=str, default=config["time"],
                         help="Example: new, hour, day, week, month, year")
     parser.add_argument("-n", "--nsfw", action='store_true', default=config["nsfw"], help="Enables NSFW tagged posts.")
@@ -85,34 +79,30 @@ def parse_args():
     return args
 
 
-def get_top_image(sub_reddit):
-    """Get image link of most upvoted wallpaper of the day
-    :sub_reddit: name of the sub reddit
-    :return: the image link
+def get_wallpaper():
+    """Get link of the wallpaper corresponding to the given arguments.
+    Uses https://wallhaven.cc/help/api
+
+    Stops the program if no image were found
+
+    :return: the wallpaper link
     """
-    submissions = sub_reddit.new(limit=10) if args.time == "new" else sub_reddit.hot(params={"t": args.time},
-                                                                                     limit=10)
-    for submission in submissions:
-        ret = {"id": submission.id}
-        if not args.nsfw and submission.over_18:
-            continue
-        url = submission.url
-        # Strip trailing arguments (after a '?')
-        url = re.sub(R"\?.*", "", url)
-        ret['type'] = url.split(".")[-1]
 
-        if url.endswith(".jpg") or url.endswith(".png"):
-            ret["url"] = url
-        # Imgur support
-        elif ("imgur.com" in url) and ("/a/" not in url) and ("/gallery/" not in url):
-            if url.endswith("/new"):
-                url = url.rsplit("/", 1)[0]
-            id = url.rsplit("/", 1)[1].rsplit(".", 1)[0]
-            ret["url"] = "http://i.imgur.com/{id}.jpg".format(id=id)
-        else:
-            continue
+    response = requests.get(
+        'https://wallhaven.cc/api/v1/search?' +
+            'sorting=toplist' + '&' +
+            'topRange=1d' + '&' +
+            'atleast=1920x1080'
+    )
 
-        return ret
+    if (response.status_code == 200):
+        data = response.json()
+        try:
+            return data['data'][0]['path']
+        except Exception as e:
+            sys.exit('Error: API Issue (has it been updated?): ' + e.message)
+    else:
+        sys.exit('Error: Could not look for images online on wallhaven.cc')
 
 
 def detect_desktop_environment():
@@ -164,32 +154,29 @@ def detect_desktop_environment():
 if __name__ == '__main__':
 
     args = parse_args()
-    subreddit = args.subreddit
     save_dir = args.output
 
     supported_linux_desktop_envs = ["gnome", "mate", "kde", "lubuntu", "i3"]
 
-    # Python Reddit Api Wrapper
-    r = praw.Reddit(user_agent="Get top wallpaper from /r/{subreddit} by /u/ssimunic".format(subreddit=subreddit))
-
     # Get top image link
-    image = get_top_image(r.subreddit(subreddit))
-    if "url" not in image:
-        sys.exit("Error: No suitable images were found, the program is now" \
-                 " exiting.")
+    image_url = get_wallpaper()
 
     # Request image
-    response = requests.get(image["url"], allow_redirects=False)
+    response = requests.get(image_url, allow_redirects=False)
 
     # If image is available, proceed to save
-    if response.status_code == requests.codes.ok:
+    if response.status_code == 200:
         # Get home directory and location where image will be saved
         # (default location for Ubuntu is used)
-        home_dir = os.path.expanduser("~")
-        save_location = "{home_dir}/{save_dir}/{subreddit}-{id}.{image_type}".format(home_dir=home_dir, save_dir=save_dir,
-                                                                            subreddit=subreddit,
-                                                                            id=image["id"],
-                                                                            image_type=image['type'])
+        home_dir = os.path.expanduser('~')
+        image_id = image_url.split('/')[-1].split('.')[0]
+        image_type = image_url.split('.')[-1]
+        save_location = "{home_dir}/{save_dir}/{id}.{image_type}".format(
+            home_dir=home_dir,
+            save_dir=save_dir,
+            id=image_id,
+            image_type=image_type
+        )
 
         if not os.path.isfile(save_location):
             # Create folders if they don't exist
