@@ -27,7 +27,8 @@ def load_config():
 
     default = defaultdict(str)
     default['nsfw'] = 'False'
-    default['time'] = '1d'
+    default['sorting'] = 'toplist'
+    default['toprange'] = '1d'
     default['display'] = '0'
     default['output'] = '~/Pictures/Wallpapers'
 
@@ -64,8 +65,9 @@ def load_config():
                         ret[name] = default[name]
 
                 add_to_ret(config.getboolean, 'nsfw')
+                add_to_ret(config.get, 'sorting')
+                add_to_ret(config.get, 'toprange')
                 add_to_ret(config.getint, 'display')
-                add_to_ret(config.get, 'time')
                 add_to_ret(config.get, 'output')
 
                 return ret
@@ -78,9 +80,27 @@ def load_config():
 config = load_config()
 
 
+def toprange(astring):
+    """Validates the given parameter as being a valid toprange parameter for
+    the API. Used by the argument parser.
+
+    Args:
+        astring (string): A string that is supposed to be a toprange parameter
+
+    Raises:
+        ValueError: raised if the given string is not a toprange parameter
+
+    Returns:
+        string: the original string if it's a valid one
+    """
+    if astring not in ['1d', '3d', '1w', '1M', '3M', '6M', '1y']:
+        raise ValueError
+    return astring
+
+
 def sorting(astring):
-    """Validates the given parameter as being a valid sorting parameter for the
-    API. Used by the argument parser.
+    """Validates the given parameter as being a valid sorting parameter for
+    the API. Used by the argument parser.
 
     Args:
         astring (string): A string that is supposed to be a sorting parameter
@@ -91,7 +111,8 @@ def sorting(astring):
     Returns:
         string: the original string if it's a valid one
     """
-    if astring not in ['1d', '3d', '1w', '1M', '3M', '6M', '1y']:
+    if astring not in ['date_added', 'relevance', 'random', 'views',
+                       'favorites', 'toplist']:
         raise ValueError
     return astring
 
@@ -105,8 +126,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Daily Wallhaven Wallpaper')
 
     parser.add_argument(
-        '-t', '--sort', type=sorting, default=config['time'],
-        help='Example: 1d, 3d, 1w, 1M, 3M, 6M, 1y'
+        '-s', '--sorting', type=sorting, default=config['sorting'],
+        help='Values: date_added, relevance, random, views, favorites, toplist'
+    )
+    parser.add_argument(
+        '-t', '--toprange', type=toprange, default=config['toprange'],
+        help='Values: 1d, 3d, 1w, 1M, 3M, 6M, 1y'
     )
     parser.add_argument(
         '-n', '--nsfw', action='store_true', default=config['nsfw'],
@@ -136,8 +161,8 @@ def get_wallpaper():
 
     response = requests.get(
         'https://wallhaven.cc/api/v1/search?' +
-        'sorting=toplist' + '&' +
-        'topRange=1d' + '&' +
+        'sorting=' + config['sorting'] + '&' +
+        'topRange=' + config['toprange'] + '&' +
         'atleast=1920x1080'
     )
 
