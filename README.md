@@ -1,8 +1,10 @@
-# Daily Reddit Wallpaper
-[![Build Status](https://travis-ci.org/ssimunic/Daily-Reddit-Wallpaper.svg?branch=master)](https://travis-ci.org/ssimunic/Daily-Reddit-Wallpaper)
+# Daily Wallhaven Wallpaper
+![release](https://img.shields.io/github/v/release/N3ROO/Daily-Wallhaven-Wallpaper)
 
-This script changes your wallpaper to most upvoted image of the day on [/r/wallpapers](https://www.reddit.com/r/wallpapers/) or from any other subreddit.
+**WORK IN PROGRESS!**
+*Forked from [Daily Reddit Wallpaper](https://github.com/ssimunic/Daily-Reddit-Wallpaper)*
 
+This script changes your wallpaper to top image of the day on [Wallhaven.cc](https://wallhaven.cc/). More customization will come later on.
 
 **Run it on startup for new wallpaper on every session.**
 
@@ -35,19 +37,14 @@ Using script
 
 Simply run:
 ```
-python /home/silvio/Scripts/change_wallpaper_reddit.py
+python /path/change_wallpaper_wallhaven.py
 ```
 
-If you wanna use other subreddit, include argument with the subreddit name:
-```
-python /home/silvio/Scripts/change_wallpaper_reddit.py --subreddit art
-```
-
-If you don't want to change your wallpaper daily, you can use newest, hourly, weekly, monthly or yearly wallpaper too by adding one of the following arguments: ```new```, ```hour```, ```week```, ```month```, ```year``` to the script.
+You can also use newest, hourly, weekly, monthly or yearly wallpaper by adding one of the following arguments: ```new```, ```hour```, ```week```, ```month```, ```year``` to the script.
 
 Example:
 ```
-python /home/silvio/Scripts/change_wallpaper_reddit.py --time week
+python /home/silvio/Scripts/change_wallpaper_wallhaven.py --time week
 ```
 
 NSFW images are disabled by default, to enable them add ```--nsfw```.
@@ -62,12 +59,12 @@ Ubuntu
 ------
 To make managment of the script simple, we can accomplish this using built-in Startup Applications.
 
-![Startup Applications](http://i.imgur.com/NDFmFd9.png)
+![Startup Applications](.github/screenshots/NDFmFd9.png)
 
 
 Click on Add.
 
-![Add new startup command](http://i.imgur.com/uFqQ8ky.png)
+![Add new startup command](.github/screenshots/uFqQ8ky.png)
 
 Note: you can use ```--subreddit``` and ```--time``` arguments here aswell.
 
@@ -78,24 +75,24 @@ We will be using Task Scheduler for this. You can find it in Windows search.
 Once you open it, click on ```Create Basic Task```
 Follow the procedure.
 
-![Procedure](http://i.imgur.com/1uZMpyc.png)
+![Procedure](.github/screenshots/1uZMpyc.png)
 
-![Procedure](http://i.imgur.com/3ApvF6W.png)
+![Procedure](.github/screenshots/3ApvF6W.png)
 
-![Procedure](http://i.imgur.com/fPdwcyg.png)
+![Procedure](.github/screenshots/fPdwcyg.png)
 
-![Procedure](http://i.imgur.com/zOCCfQI.png)
+![Procedure](.github/screenshots/zOCCfQI.png)
 
 In ```Add arguments``` field type the location of the script. Example
 
 ```
-"D:\change_wallpaper_reddit.py"
+"C:\change_wallpaper_haven.py"
 ```
 
 or
 
 ```
-"D:\change_wallpaper_reddit.py" --subreddit art --time week
+"C:\change_wallpaper_haven.py" --time week
 ```
 
 Running every minute or hour
@@ -106,11 +103,10 @@ Look into using cronjobs on Linux or Task Scheduler on Windows for performing th
 Configuration file
 =======
 
-Instead of writing arguments every time you run the script, you can also use configuration file which should be located at ```~/.config/change_wallpaper_reddit.rc```.
+Instead of writing arguments every time you run the script, you can also use configuration file which should be located at ```~/.config/change_wallpaper_haven.rc```.
 
 Example of configuration file:
 
 ```
-subreddit=art
 time=day
 ```
