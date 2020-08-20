@@ -1,14 +1,13 @@
 # Daily Wallhaven Wallpaper
 ![release](https://img.shields.io/github/v/release/N3ROO/Daily-Wallhaven-Wallpaper)
 
-**WORK IN PROGRESS!**
 *Forked from [Daily Reddit Wallpaper](https://github.com/ssimunic/Daily-Reddit-Wallpaper)*
 
-This script changes your wallpaper to top image of the day on [Wallhaven.cc](https://wallhaven.cc/). More customization will come later on.
+This script changes your wallpaper to top image of the day on [Wallhaven.cc](https://wallhaven.cc/). More customization will come later on. The script is currently in development.
 
 **Run it on startup for new wallpaper on every session.**
 
-*Supported: Linux (gnome, kde, mate, lxde), Windows and OS X*
+*Supported: Linux (gnome, kde, mate, lxde), Windows and OS X with Python 2 and 3*
 
 Dependencies
 =======
@@ -37,26 +36,30 @@ Using script
 
 Simply run:
 ```
-python /path/change_wallpaper_wallhaven.py
+python /path_to_file/change_wallpaper_wallhaven.py
 ```
 
-You can also use newest, hourly, weekly, monthly or yearly wallpaper by adding one of the following arguments: ```new```, ```hour```, ```week```, ```month```, ```year``` to the script.
+There are few optional parameters than you can visualize by typing 
 
-Example:
 ```
-python /home/silvio/Scripts/change_wallpaper_wallhaven.py --time week
+python /path_to_file/change_wallpaper_wallhaven.py -h
 ```
 
-NSFW images are disabled by default, to enable them add ```--nsfw```.
+After running the script once, a file called `change_wallpaper_haven.rc` will be created in `~/.config/`. You can customize all the settings here. Use the `-h` option to see all the valid parameters.
 
-On OS X, you can specify display number with option ```--display```. Use 0 for all display (default), 1 for main display and so on.
+The files are automatically saved to `~/Pictures/Wallpapers`. You can also change that in the config file (or by using the `-o` parameter).
 
-To change default location where image will be saved, use ```--output folder/subfolder```.
+**Note:** NSFW is currently not working because you need to provide an API key. If NSFW is turned on, it will allow SFW and Sketchy wallpapers will be shown (not NSFW, will implement that feature later on).
 
 Running on startup
 =======
+**Warning!** The screenshots shown here are from the main github repository that was designed to get a daily picture from Reddit, and not from Wallhaven. Just replace `reddit` by `wallhaven` and you're all set.
+
+
 Ubuntu
 ------
+
+
 To make managment of the script simple, we can accomplish this using built-in Startup Applications.
 
 ![Startup Applications](.github/screenshots/NDFmFd9.png)
@@ -83,16 +86,16 @@ Follow the procedure.
 
 ![Procedure](.github/screenshots/zOCCfQI.png)
 
-In ```Add arguments``` field type the location of the script. Example
+In `Add arguments` field type the location of the script. Example
 
 ```
 "C:\change_wallpaper_haven.py"
 ```
 
-or
+or even with parameters
 
 ```
-"C:\change_wallpaper_haven.py" --time week
+"C:\change_wallpaper_haven.py" --sorting toplist --toprange 3d
 ```
 
 Running every minute or hour
@@ -108,5 +111,10 @@ Instead of writing arguments every time you run the script, you can also use con
 Example of configuration file:
 
 ```
-time=day
+[DEFAULT]
+nsfw = False
+sorting = toplist
+toprange = 1y
+display = 0
+output = F:\Library\Pictures\wallpaper
 ```
