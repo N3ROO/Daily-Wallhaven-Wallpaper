@@ -163,7 +163,7 @@ def get_wallpaper():
         'https://wallhaven.cc/api/v1/search?' +
         'sorting=' + config['sorting'] + '&' +
         'topRange=' + config['toprange'] + '&' +
-        'purity=' + '110' if config['nsfw'] else '000' + '&' +
+        'purity=' + ('110' if config['nsfw'] else '000') + '&' +
         'atleast=1920x1080'
     )
 
