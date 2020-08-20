@@ -19,6 +19,12 @@ else:
 
 
 def load_config():
+    """ Loads the config file if it exists. Otherwise it creates it with the default values at ~/.config/.
+
+    Returns:
+        dict: the configuration
+    """
+
     default = defaultdict(str)
     default["nsfw"] = "False"
     default["time"] = "1d"
@@ -29,34 +35,42 @@ def load_config():
     section_name = "root"
     try:
         config = ConfigParser(default)
-        with open(config_path, "r") as stream:
-            stream = StringIO("[{section_name}]\n{stream_read}".format(section_name=section_name,
-                                                                       stream_read=stream.read()))
-            if sys.version_info >= (3, 0):
-                config.read_file(stream)
-            else:
-                config.readfp(stream)
 
-            ret = {}
+        if not os.path.exists(config_path):
+            with open(config_path, 'w+') as f:
+                config.write(f)
+            return default
+        else:
+            with open(config_path, "r") as stream:
+                stream = StringIO("[{section_name}]\n{stream_read}".format(section_name=section_name,
+                                                                        stream_read=stream.read()))
+                if sys.version_info >= (3, 0):
+                    config.read_file(stream)
+                else:
+                    config.readfp(stream)
 
-            # Add a value to ret, printing an error message if there is an error
-            def add_to_ret(fun, name):
-                try:
-                    ret[name] = fun(section_name, name)
-                except ValueError as e:
-                    err_str = "Error in config file.  Variable '{}': {}. The default '{}' will be used."
-                    print(err_str)
-                    #print sys.stderr >> err_str.format(name, str(e), default[name])
-                    ret[name] = default[name]
+                ret = {}
 
-            add_to_ret(config.getboolean, "nsfw")
-            add_to_ret(config.getint, "display")
-            add_to_ret(config.get, "time")
-            add_to_ret(config.get, "output")
+                # Add a value to ret, printing an error message if there is an error
+                def add_to_ret(fun, name):
+                    try:
+                        ret[name] =  fun(section_name, name)
+                    except ValueError as e:
+                        err_str = "Error in config file. Variable '{}'. The default '{}' will be used.".format(
+                            name, default[name]
+                        )
+                        print(err_str)
+                        ret[name] = default[name]
 
-            return ret
+                add_to_ret(config.getboolean, "nsfw")
+                add_to_ret(config.getint, "display")
+                add_to_ret(config.get, "time")
+                add_to_ret(config.get, "output")
+
+                return ret
 
     except IOError as e:
+        print(e)
         return default
 
 config = load_config()
@@ -158,7 +172,6 @@ def detect_desktop_environment():
 
 
 if __name__ == '__main__':
-
     args = parse_args()
     save_dir = args.output
 
