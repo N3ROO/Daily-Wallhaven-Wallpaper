@@ -26,13 +26,13 @@ def load_config():
     """
 
     default = defaultdict(str)
-    default["nsfw"] = "False"
-    default["time"] = "1d"
-    default["display"] = "0"
-    default["output"] = "~/Pictures/Wallpapers"
+    default['nsfw'] = 'False'
+    default['time'] = '1d'
+    default['display'] = '0'
+    default['output'] = '~/Pictures/Wallpapers'
 
-    config_path = os.path.expanduser("~/.config/change_wallpaper_haven.rc")
-    section_name = "root"
+    config_path = os.path.expanduser('~/.config/change_wallpaper_haven.rc')
+    section_name = 'root'
     try:
         config = ConfigParser(default)
 
@@ -41,8 +41,8 @@ def load_config():
                 config.write(f)
             return default
         else:
-            with open(config_path, "r") as stream:
-                stream = StringIO("[{section_name}]\n{stream_read}".format(section_name=section_name,
+            with open(config_path, 'r') as stream:
+                stream = StringIO('[{section_name}]\n{stream_read}'.format(section_name=section_name,
                                                                         stream_read=stream.read()))
                 if sys.version_info >= (3, 0):
                     config.read_file(stream)
@@ -56,16 +56,16 @@ def load_config():
                     try:
                         ret[name] =  fun(section_name, name)
                     except ValueError as e:
-                        err_str = "Error in config file. Variable '{}'. The default '{}' will be used.".format(
+                        err_str = 'Error in config file. Variable '{}'. The default '{}' will be used.'.format(
                             name, default[name]
                         )
                         print(err_str)
                         ret[name] = default[name]
 
-                add_to_ret(config.getboolean, "nsfw")
-                add_to_ret(config.getint, "display")
-                add_to_ret(config.get, "time")
-                add_to_ret(config.get, "output")
+                add_to_ret(config.getboolean, 'nsfw')
+                add_to_ret(config.getint, 'display')
+                add_to_ret(config.get, 'time')
+                add_to_ret(config.get, 'output')
 
                 return ret
 
@@ -86,14 +86,22 @@ def parse_args():
     """parse args with argparse
     :returns: args
     """
-    parser = argparse.ArgumentParser(description="Daily Wallhaven Wallpaper")
-    parser.add_argument("-t", "--time", type=sorting, default=config["time"],
-                        help="Example: 1d, 3d, 1w, 1M, 3M, 6M, 1y")
-    parser.add_argument("-n", "--nsfw", action='store_true', default=config["nsfw"], help="Enables NSFW tagged posts.")
-    parser.add_argument("-d", "--display", type=int, default=config["display"],
-                        help="Desktop display number on OS X (0: all displays, 1: main display, etc")
-    parser.add_argument("-o", "--output", type=str, default=config["output"],
-                        help="Set the outputfolder in the home directory to save the Wallpapers to.")
+    parser = argparse.ArgumentParser(description='Daily Wallhaven Wallpaper')
+
+    parser.add_argument(
+        '-t', '--sort', type=sorting, default=config['time'],
+        help='Example: 1d, 3d, 1w, 1M, 3M, 6M, 1y'
+    )
+    parser.add_argument(
+        '-n', '--nsfw', action='store_true', default=config['nsfw'],
+        help='Enables NSFW tagged posts.'
+    )
+    parser.add_argument(
+        '-d', '--display', type=int, default=config['display'],
+        help='Desktop display number on OS X ' + '(0: all displays, 1: main display, etc'
+    )
+    parser.add_argument('-o', '--output', type=str, default=config['output'],
+                        help='Set the outputfolder in the home directory to save the Wallpapers to.')
 
     args = parser.parse_args()
     return args
@@ -132,9 +140,9 @@ def detect_desktop_environment():
     :return: environment
     """
     environment = {}
-    if os.environ.get("KDE_FULL_SESSION") == "true":
-        environment["name"] = "kde"
-        environment["command"] = """
+    if os.environ.get('KDE_FULL_SESSION') == 'true':
+        environment['name'] = 'kde'
+        environment['command'] = """
                     qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
                         var allDesktops = desktops();
                         print (allDesktops);
@@ -148,23 +156,23 @@ def detect_desktop_environment():
                         }}
                     '
                 """
-    elif os.environ.get("GNOME_DESKTOP_SESSION_ID"):
-        environment["name"] = "gnome"
-        environment["command"] = "gsettings set org.gnome.desktop.background picture-uri file://{save_location}"
-    elif os.environ.get("DESKTOP_SESSION") == "Lubuntu":
-        environment["name"] = "lubuntu"
-        environment["command"] = "pcmanfm -w {save_location} --wallpaper-mode=fit"
-    elif os.environ.get("DESKTOP_SESSION") == "mate":
-        environment["name"] = "mate"
-        environment["command"] = "gsettings set org.mate.background picture-filename {save_location}"
-    elif os.environ.get("DESKTOP_SESSION") == "i3":
-        environment["name"] = "i3"
-        environment["command"] = "feh --bg-scale {save_location}"
+    elif os.environ.get('GNOME_DESKTOP_SESSION_ID'):
+        environment['name'] = 'gnome'
+        environment['command'] = 'gsettings set org.gnome.desktop.background picture-uri file://{save_location}'
+    elif os.environ.get('DESKTOP_SESSION') == 'Lubuntu':
+        environment['name'] = 'lubuntu'
+        environment['command'] = 'pcmanfm -w {save_location} --wallpaper-mode=fit'
+    elif os.environ.get('DESKTOP_SESSION') == 'mate':
+        environment['name'] = 'mate'
+        environment['command'] = 'gsettings set org.mate.background picture-filename {save_location}'
+    elif os.environ.get('DESKTOP_SESSION') == 'i3':
+        environment['name'] = 'i3'
+        environment['command'] = 'feh --bg-scale {save_location}'
     else:
         try:
-            info = subprocess.getoutput("xprop -root _DT_SAVE_MODE")
-            if ' = "xfce4"' in info:
-                environment["name"] = "xfce"
+            info = subprocess.getoutput('xprop -root _DT_SAVE_MODE')
+            if ' = 'xfce4'' in info:
+                environment['name'] = 'xfce'
         except (OSError, RuntimeError):
             environment = None
             pass
@@ -175,7 +183,7 @@ if __name__ == '__main__':
     args = parse_args()
     save_dir = args.output
 
-    supported_linux_desktop_envs = ["gnome", "mate", "kde", "lubuntu", "i3"]
+    supported_linux_desktop_envs = ['gnome', 'mate', 'kde', 'lubuntu', 'i3']
 
     # Get top image link
     image_url = get_wallpaper()
@@ -193,7 +201,7 @@ if __name__ == '__main__':
 
         image_id = image_url.split('/')[-1].split('.')[0]
         image_type = image_url.split('.')[-1]
-        save_location = "{save_dir}/{id}.{image_type}".format(
+        save_location = '{save_dir}/{id}.{image_type}'.format(
             save_dir=save_dir,
             id=image_id,
             image_type=image_type
@@ -206,23 +214,23 @@ if __name__ == '__main__':
                 os.makedirs(dir)
 
             # Write to disk
-            with open(save_location, "wb") as fo:
+            with open(save_location, 'wb') as fo:
                 for chunk in response.iter_content(4096):
                     fo.write(chunk)
 
         # Check OS and environments
         platform_name = platform.system()
-        if platform_name.startswith("Lin"):
+        if platform_name.startswith('Lin'):
 
             # Check desktop environments for linux
             desktop_environment = detect_desktop_environment()
-            if desktop_environment and desktop_environment["name"] in supported_linux_desktop_envs:
-                os.system(desktop_environment["command"].format(save_location=save_location))
+            if desktop_environment and desktop_environment['name'] in supported_linux_desktop_envs:
+                os.system(desktop_environment['command'].format(save_location=save_location))
             else:
-                print("Unsupported desktop environment")
+                print('Unsupported desktop environment')
 
         # Windows
-        if platform_name.startswith("Win"):
+        if platform_name.startswith('Win'):
             # Python 3.x
             if sys.version_info >= (3, 0):
                 ctypes.windll.user32.SystemParametersInfoW(20, 0, save_location, 3)
@@ -231,7 +239,7 @@ if __name__ == '__main__':
                 ctypes.windll.user32.SystemParametersInfoA(20, 0, save_location, 3)
 
         # OS X/macOS
-        if platform_name.startswith("Darwin"):
+        if platform_name.startswith('Darwin'):
             if args.display == 0:
                 command = """
                         osascript -e 'tell application "System Events"
@@ -253,4 +261,4 @@ if __name__ == '__main__':
                                                 save_location=save_location)
             os.system(command)
     else:
-        sys.exit("Error: Image url is not available, the program is now exiting.")
+        sys.exit('Error: Image url is not available, the program is now exiting.')
