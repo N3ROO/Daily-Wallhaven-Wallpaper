@@ -126,6 +126,18 @@ def sorting(astring):
 
 
 def atleast(astring):
+    """Validates the given parameter as being a valid atleast parameter for
+    the API. Used by the argument parser.
+
+    Args:
+        astring (string): A string that is supposed to be an atleast parameter
+
+    Raises:
+        ValueError: raised if the given string is not an atleast parameter
+
+    Returns:
+        string: the original string if it's a valid one
+    """
     split = astring.split('x')
     if len(split) != 2:
         raise ValueError
@@ -139,12 +151,36 @@ def atleast(astring):
 
 
 def order(astring):
+    """Validates the given parameter as being a valid order parameter for
+    the API. Used by the argument parser.
+
+    Args:
+        astring (string): A string that is supposed to be an order parameter
+
+    Raises:
+        ValueError: raised if the given string is not an order parameter
+
+    Returns:
+        string: the original string if it's a valid one
+    """
     if astring not in ['desc', 'asc']:
         raise ValueError
     return astring
 
 
 def filters(astring):
+    """Validates the given parameter as being a valid filters parameter for
+    the API. Used by the argument parser.
+
+    Args:
+        astring (string): A string that is supposed to be an filters parameter
+
+    Raises:
+        ValueError: raised if the given string is not an filters parameter
+
+    Returns:
+        string: the original string if it's a valid one
+    """
     if len(astring) != 3:
         raise ValueError
     else:
