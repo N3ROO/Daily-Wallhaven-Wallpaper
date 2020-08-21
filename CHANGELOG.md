@@ -18,3 +18,4 @@ Changes from main repository:
 - Improved config file loading / saving (it was not working on the main branch)
 - Improved output dir (it was relative to the home directory ~)
 - Improved logging (to know what goes wrong)
+- It does not download the wallpaper if it already exists

@@ -369,8 +369,7 @@ if __name__ == '__main__':
 
     # File logging
     filename = 'latest_log.log'
-    file_handler = RotatingFileHandler(
-        filename, 'w', encoding="UTF-8")
+    file_handler = RotatingFileHandler(filename, 'w', encoding="UTF-8")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -385,85 +384,91 @@ if __name__ == '__main__':
     # Get top image link
     image_url = get_wallpaper()
 
-    # Request image
-    logger.info('Downloading image from ' + image_url)
-    response = requests.get(image_url, allow_redirects=False)
+    # Image info
+    image_id = image_url.split('/')[-1].split('.')[0]
+    image_type = image_url.split('.')[-1]
 
-    # If image is available, proceed to save
-    if response.status_code == 200:
-        # Get location where image will be saved
-        save_dir = args.output
-        if '~' in save_dir:
-            save_dir = save_dir.replace('~', os.path.expanduser('~'))
-
-        image_id = image_url.split('/')[-1].split('.')[0]
-        image_type = image_url.split('.')[-1]
+    # Get location where image will be saved
+    save_dir = args.output
+    if '~' in save_dir:
+        save_dir = save_dir.replace('~', os.path.expanduser('~'))
         save_location = '{save_dir}/{id}.{image_type}'.format(
             save_dir=save_dir,
             id=image_id,
             image_type=image_type
         )
 
-        if not os.path.isfile(save_location):
-            # Create directory if it doesn't exist
-            dir = os.path.dirname(save_location)
-            if not os.path.exists(dir):
-                os.makedirs(dir)
+    if not os.path.isfile(save_location):
+        # Request image if it does not exist yet
+        logger.info('Downloading image from ' + image_url)
+        response = requests.get(image_url, allow_redirects=False)
 
-            # Write to disk
-            with open(save_location, 'wb') as fo:
-                for chunk in response.iter_content(4096):
-                    fo.write(chunk)
+        # If image is available, proceed to save
+        if response.status_code == 200:
+            if not os.path.isfile(save_location):
+                # Create directory if it doesn't exist
+                dir = os.path.dirname(save_location)
+                if not os.path.exists(dir):
+                    os.makedirs(dir)
 
-        # Check OS and environments
-        platform_name = platform.system()
-        if platform_name.startswith('Lin'):
-
-            # Check desktop environments for linux
-            desktop_environment = detect_desktop_environment()
-            if ((desktop_environment and desktop_environment['name'])
-                    in supported_linux_desktop_envs):
-                os.system(desktop_environment['command'].format(
-                    save_location=save_location)
-                )
-            else:
-                print('Unsupported desktop environment')
-
-        # Windows
-        if platform_name.startswith('Win'):
-            # Python 3.x
-            if sys.version_info >= (3, 0):
-                ctypes.windll.user32.SystemParametersInfoW(
-                    20, 0, save_location, 3
-                )
-            # Python 2.x
-            else:
-                ctypes.windll.user32.SystemParametersInfoA(
-                    20, 0, save_location, 3
-                )
-
-        # OS X/macOS
-        if platform_name.startswith('Darwin'):
-            if args.display == 0:
-                command = """
-                        osascript -e 'tell application "System Events"
-                            set desktopCount to count of desktops
-                            repeat with desktopNumber from 1 to desktopCount
-                                tell desktop desktopNumber
-                                    set picture to "{save_location}"
-                                end tell
-                            end repeat
-                        end tell'
-                          """.format(save_location=save_location)
-            else:
-                command = """osascript -e 'tell application "System Events"
-                                set desktopCount to count of desktops
-                                tell desktop {display}
-                                    set picture to "{save_location}"
-                                end tell
-                            end tell'""".format(display=args.display,
-                                                save_location=save_location)
-            os.system(command)
+                # Write to disk
+                with open(save_location, 'wb') as fo:
+                    for chunk in response.iter_content(4096):
+                        fo.write(chunk)
+        else:
+            logger.info('Could not download image, err' + response.status_code)
+            sys.exit('Error: Image url is not available, exiting')
     else:
-        logger.info('Could not download image (' + response.status_code + ')')
-        sys.exit('Error: Image url is not available, exiting')
+        logger.info('The wallpaper already exists at ' + save_location)
+
+    # Change wallpaper to the new one
+
+    # Check OS and environments
+    platform_name = platform.system()
+    if platform_name.startswith('Lin'):
+
+        # Check desktop environments for linux
+        desktop_environment = detect_desktop_environment()
+        if ((desktop_environment and desktop_environment['name'])
+                in supported_linux_desktop_envs):
+            os.system(desktop_environment['command'].format(
+                save_location=save_location)
+            )
+        else:
+            print('Unsupported desktop environment')
+
+    # Windows
+    if platform_name.startswith('Win'):
+        # Python 3.x
+        if sys.version_info >= (3, 0):
+            ctypes.windll.user32.SystemParametersInfoW(
+                20, 0, save_location, 3
+            )
+        # Python 2.x
+        else:
+            ctypes.windll.user32.SystemParametersInfoA(
+                20, 0, save_location, 3
+            )
+
+    # OS X/macOS
+    if platform_name.startswith('Darwin'):
+        if args.display == 0:
+            command = """
+                    osascript -e 'tell application "System Events"
+                        set desktopCount to count of desktops
+                        repeat with desktopNumber from 1 to desktopCount
+                            tell desktop desktopNumber
+                                set picture to "{save_location}"
+                            end tell
+                        end repeat
+                    end tell'
+                    """.format(save_location=save_location)
+        else:
+            command = """osascript -e 'tell application "System Events"
+                            set desktopCount to count of desktops
+                            tell desktop {display}
+                                set picture to "{save_location}"
+                            end tell
+                        end tell'""".format(display=args.display,
+                                            save_location=save_location)
+        os.system(command)
