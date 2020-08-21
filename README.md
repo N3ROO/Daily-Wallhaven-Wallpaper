@@ -3,7 +3,7 @@
 
 *Forked from [Daily Reddit Wallpaper](https://github.com/ssimunic/Daily-Reddit-Wallpaper)*
 
-This script changes your wallpaper to top image of the day on [Wallhaven.cc](https://wallhaven.cc/). More customization will come later on. The script is currently in development.
+This script changes your wallpaper to top image of the day on [Wallhaven.cc](https://wallhaven.cc/).
 
 **Run it on startup for new wallpaper on every session.**
 
@@ -110,6 +110,7 @@ Example of configuration file:
 
 ```
 [DEFAULT]
+apikey = 
 sorting = toplist
 toprange = 1d
 order = desc

@@ -1,6 +1,7 @@
 ## Version 1.0.0
 
 Customization:
+- Api key
 - Categories
 - Purity
 - Sorting

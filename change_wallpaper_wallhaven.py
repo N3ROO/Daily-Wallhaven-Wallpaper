@@ -26,6 +26,7 @@ def load_config():
     """
 
     default = defaultdict(str)
+    default['apikey'] = ''
     default['sorting'] = 'toplist'
     default['toprange'] = '1d'
     default['order'] = 'desc'
@@ -67,6 +68,7 @@ def load_config():
                         print(err_str)
                         ret[name] = default[name]
 
+                add_to_ret(config.get, 'apikey')
                 add_to_ret(config.get, 'sorting')
                 add_to_ret(config.get, 'toprange')
                 add_to_ret(config.get, 'order')
@@ -161,6 +163,10 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description='Daily Wallhaven Wallpaper')
 
+    parser.add_argument(
+        '-api', '--apikey', type=str, default=config['apikey'],
+        help='Values: your api key, see: https://wallhaven.cc/settings/account'
+    )
     parser.add_argument(
         '-s', '--sorting', type=sorting, default=config['sorting'],
         help='Values: date_added, relevance, random, views, favorites, toplist'
