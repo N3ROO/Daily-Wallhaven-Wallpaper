@@ -19,6 +19,7 @@ else:
     import subprocess
 
 
+__SCRIPT_VERSION__ = '1.0.0'
 logger = logging.getLogger(__name__)
 global config
 
@@ -213,7 +214,9 @@ def parse_args():
     Returns:
         dict: parsed args
     """
-    parser = argparse.ArgumentParser(description='Daily Wallhaven Wallpaper')
+    parser = argparse.ArgumentParser(
+        description='Daily Wallhaven Wallpaper ' + __SCRIPT_VERSION__
+        )
 
     parser.add_argument(
         '-api', '--apikey', type=str, default=config['apikey'],
@@ -370,6 +373,8 @@ if __name__ == '__main__':
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
+
+    logger.info('Using Daily Wallhaven Wallpaper v.' + __SCRIPT_VERSION__)
 
     config = load_config()
 

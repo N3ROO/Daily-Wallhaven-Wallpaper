@@ -11,6 +11,7 @@ Customization:
 
 Misc:
 - Logging
+- Version
 
 Changes from main repository:
 - Replaced script to grab a reddit image by a script that uses the Wallhaven API to retrieve an image
