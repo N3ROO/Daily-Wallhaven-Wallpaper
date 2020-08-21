@@ -432,11 +432,12 @@ if __name__ == '__main__':
     save_dir = args.output
     if '~' in save_dir:
         save_dir = save_dir.replace('~', os.path.expanduser('~'))
-        save_location = '{save_dir}/{id}.{image_type}'.format(
-            save_dir=save_dir,
-            id=image_id,
-            image_type=image_type
-        )
+
+    save_location = '{save_dir}/{id}.{image_type}'.format(
+        save_dir=save_dir,
+        id=image_id,
+        image_type=image_type
+    )
 
     if not os.path.isfile(save_location):
         # Request image if it does not exist yet
