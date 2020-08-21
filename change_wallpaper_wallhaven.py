@@ -26,9 +26,12 @@ def load_config():
     """
 
     default = defaultdict(str)
-    default['nsfw'] = 'False'
     default['sorting'] = 'toplist'
     default['toprange'] = '1d'
+    default['order'] = 'desc'
+    default['atleast'] = '1920x1080'
+    default['categories'] = '100'
+    default['purity'] = '100'
     default['display'] = '0'
     default['output'] = '~/Pictures/Wallpapers'
 
@@ -64,9 +67,12 @@ def load_config():
                         print(err_str)
                         ret[name] = default[name]
 
-                add_to_ret(config.getboolean, 'nsfw')
                 add_to_ret(config.get, 'sorting')
                 add_to_ret(config.get, 'toprange')
+                add_to_ret(config.get, 'order')
+                add_to_ret(config.get, 'atleast')
+                add_to_ret(config.get, 'categories')
+                add_to_ret(config.get, 'purity')
                 add_to_ret(config.getint, 'display')
                 add_to_ret(config.get, 'output')
 
@@ -117,6 +123,36 @@ def sorting(astring):
     return astring
 
 
+def atleast(astring):
+    split = astring.split('x')
+    if len(split) != 2:
+        raise ValueError
+    else:
+        try:
+            int(split[0])
+            int(split[1])
+        except Exception:
+            raise ValueError
+    return astring
+
+
+def order(astring):
+    if astring not in ['desc', 'asc']:
+        raise ValueError
+    return astring
+
+
+def filters(astring):
+    if len(astring) != 3:
+        raise ValueError
+    else:
+        try:
+            int(astring)
+        except Exception:
+            raise ValueError
+    return astring
+
+
 def parse_args():
     """Parse args with argparse.
 
@@ -134,8 +170,20 @@ def parse_args():
         help='Values: 1d, 3d, 1w, 1M, 3M, 6M, 1y'
     )
     parser.add_argument(
-        '-n', '--nsfw', action='store_true', default=config['nsfw'],
-        help='Enables NSFW tagged posts.'
+        '-or', '--order', type=order, default=config['toprange'],
+        help='Values: desc, asc'
+    )
+    parser.add_argument(
+        '-al', '--atleast', type=atleast, default=config['toprange'],
+        help='Values: 1920x1080 (anything x anything)'
+    )
+    parser.add_argument(
+        '-c', '--categories', type=filters, default=config['toprange'],
+        help='Values: 100, 110, 111 (general|anime|people), on(1) off(0)'
+    )
+    parser.add_argument(
+        '-p', '--purity', type=filters, default=config['toprange'],
+        help='Values: 100, 110, 111 (sfw|sketchy|nsfw), on(1) off(0)'
     )
     parser.add_argument(
         '-d', '--display', type=int, default=config['display'],
@@ -163,8 +211,10 @@ def get_wallpaper():
         'https://wallhaven.cc/api/v1/search?' +
         'sorting=' + config['sorting'] + '&' +
         'topRange=' + config['toprange'] + '&' +
-        'purity=' + ('110' if config['nsfw'] else '000') + '&' +
-        'atleast=1920x1080'
+        'purity=' + config['purity'] + '&' +
+        'atleast=' + config['atleast'] + '&' +
+        'categories=' + config['categories'] + '&' +
+        'order=' + config['order']
     )
 
     if (response.status_code == 200):
