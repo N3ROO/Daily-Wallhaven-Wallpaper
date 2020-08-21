@@ -62,12 +62,11 @@ To make managment of the script simple, we can accomplish this using built-in St
 
 ![Startup Applications](.github/screenshots/NDFmFd9.png)
 
-
 Click on Add.
 
 ![Add new startup command](.github/screenshots/uFqQ8ky.png)
 
-Note: you can use ```--subreddit``` and ```--time``` arguments here aswell.
+Note: you can use arguments here aswell.
 
 
 Windows
