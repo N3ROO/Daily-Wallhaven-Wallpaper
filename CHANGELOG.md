@@ -9,6 +9,9 @@ Customization:
 - Toprange
 - Atleast
 
+Misc:
+- Logging
+
 Changes from main repository:
 - Replaced script to grab a reddit image by a script that uses the Wallhaven API to retrieve an image
 - Improved config file loading / saving (it was not working on the main branch)

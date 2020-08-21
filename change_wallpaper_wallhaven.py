@@ -6,6 +6,8 @@ import ctypes
 import os
 import platform
 import requests
+import logging
+from logging.handlers import RotatingFileHandler
 import sys
 from configparser import ConfigParser
 from io import StringIO
@@ -15,6 +17,10 @@ if sys.version_info <= (2, 6):
     import commands as subprocess
 else:
     import subprocess
+
+
+logger = logging.getLogger(__name__)
+global config
 
 
 def load_config():
@@ -39,20 +45,26 @@ def load_config():
     config_path = os.getcwd() + '/change_wallpaper_haven.rc'
     section_name = 'root'
     try:
+        logger.info('Initializing ConfigParcer')
         config = ConfigParser(default)
 
         if not os.path.exists(config_path):
+            logger.info('The config file does not exist, creating it')
             with open(config_path, 'w+') as f:
                 config.write(f)
+            logger.info('Config file successfully created')
             return default
         else:
+            logger.info('Config file already exists, reading it')
             with open(config_path, 'r') as stream:
                 stream = StringIO('[{section_name}]\n{stream_read}'.format(
                     section_name=section_name, stream_read=stream.read())
                 )
                 if sys.version_info >= (3, 0):
+                    logger.info('Python >= 3.0 detected')
                     config.read_file(stream)
                 else:
+                    logger.info('Python < 3.0 detected')
                     config.readfp(stream)
 
                 ret = {}
@@ -60,12 +72,12 @@ def load_config():
                 # Add a value to ret, printing an error message if needed
                 def add_to_ret(fun, name):
                     try:
+                        logger.info('Reading value for "' + name + '"')
                         ret[name] = fun(section_name, name)
                     except ValueError:
-                        err_str = ('Error in config file. Variable {}. ' +
-                                   'The default {} will be used.').format(
+                        logger.warn('Error in config file. Variable "{}". ' +
+                                    'The default "{}" will be used.').format(
                             name, default[name])
-                        print(err_str)
                         ret[name] = default[name]
 
                 add_to_ret(config.get, 'apikey')
@@ -81,11 +93,8 @@ def load_config():
                 return ret
 
     except IOError as e:
-        print(e)
+        logger.error('Error with config file: {}'.format(str(e)))
         return default
-
-
-config = load_config()
 
 
 def toprange(astring):
@@ -102,6 +111,7 @@ def toprange(astring):
         string: the original string if it's a valid one
     """
     if astring not in ['1d', '3d', '1w', '1M', '3M', '6M', '1y']:
+        logger.error(astring + ' is not a valid parameter')
         raise ValueError
     return astring
 
@@ -121,6 +131,7 @@ def sorting(astring):
     """
     if astring not in ['date_added', 'relevance', 'random', 'views',
                        'favorites', 'toplist']:
+        logger.error(astring + ' is not a valid parameter')
         raise ValueError
     return astring
 
@@ -140,12 +151,14 @@ def atleast(astring):
     """
     split = astring.split('x')
     if len(split) != 2:
+        logger.error(astring + ' is not a valid parameter')
         raise ValueError
     else:
         try:
             int(split[0])
             int(split[1])
         except Exception:
+            logger.error(astring + ' is not a valid parameter')
             raise ValueError
     return astring
 
@@ -164,6 +177,7 @@ def order(astring):
         string: the original string if it's a valid one
     """
     if astring not in ['desc', 'asc']:
+        logger.error(astring + ' is not a valid parameter')
         raise ValueError
     return astring
 
@@ -182,11 +196,13 @@ def filters(astring):
         string: the original string if it's a valid one
     """
     if len(astring) != 3:
+        logger.error(astring + ' is not a valid parameter')
         raise ValueError
     else:
         try:
             int(astring)
         except Exception:
+            logger.error(astring + ' is not a valid parameter')
             raise ValueError
     return astring
 
@@ -249,7 +265,7 @@ def get_wallpaper():
         string: the wallpaper url
     """
 
-    response = requests.get(
+    url = (
         'https://wallhaven.cc/api/v1/search?' +
         'sorting=' + config['sorting'] + '&' +
         'topRange=' + config['toprange'] + '&' +
@@ -259,14 +275,25 @@ def get_wallpaper():
         'order=' + config['order']
     )
 
+    response = requests.get(url)
+
     if (response.status_code == 200):
         data = response.json()
         try:
             return data['data'][0]['path']
         except Exception:
+            logger.error(
+                'Could not read the API. You either made more than ' +
+                '45 requests per minutes, or the API got updated.')
+            logger.error(
+                'In that case, go to ' +
+                'https://github.com/N3ROO/Daily-Wallhaven-Wallpaper and ' +
+                'download the latest version or open a new issue')
             sys.exit('Error: API Issue (has it been updated?)')
     else:
-        sys.exit('Error: Could not look for images online on wallhaven.cc')
+        logger.error('Could not reach ' + url + ' - ' + response.status_code)
+        logger.error('Are you connected to the Internet?')
+        sys.exit('Error: Could not reach wallhaven.cc')
 
 
 def detect_desktop_environment():
@@ -323,6 +350,29 @@ qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
 
 
 if __name__ == '__main__':
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s ' +
+                                  '-- %(levelname)s ' +
+                                  '-- [%(filename)s:%(lineno)s ' +
+                                  '-- %(funcName)s() ] ' +
+                                  '-- %(message)s')
+
+    # Console logging
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+
+    # File logging
+    filename = 'latest_log.log'
+    file_handler = RotatingFileHandler(filename, 'a', encoding="UTF-8")
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    config = load_config()
+
     args = parse_args()
     supported_linux_desktop_envs = ['gnome', 'mate', 'kde', 'lubuntu', 'i3']
 
@@ -330,6 +380,7 @@ if __name__ == '__main__':
     image_url = get_wallpaper()
 
     # Request image
+    logger.info('Downloading image from ' + image_url)
     response = requests.get(image_url, allow_redirects=False)
 
     # If image is available, proceed to save
@@ -408,5 +459,5 @@ if __name__ == '__main__':
                                                 save_location=save_location)
             os.system(command)
     else:
-        sys.exit('Error: Image url is not available, ' +
-                 'the program is now exiting.')
+        logger.info('Could not download image (' + response.status_code + ')')
+        sys.exit('Error: Image url is not available, exiting')
