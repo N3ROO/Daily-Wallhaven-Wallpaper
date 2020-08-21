@@ -38,6 +38,7 @@ def load_config():
     default['toprange'] = '1d'
     default['order'] = 'desc'
     default['atleast'] = '1920x1080'
+    default['ratio'] = ''
     default['categories'] = '100'
     default['purity'] = '100'
     default['display'] = '0'
@@ -86,6 +87,7 @@ def load_config():
                 add_to_ret(config.get, 'toprange')
                 add_to_ret(config.get, 'order')
                 add_to_ret(config.get, 'atleast')
+                add_to_ret(config.get, 'ratio')
                 add_to_ret(config.get, 'categories')
                 add_to_ret(config.get, 'purity')
                 add_to_ret(config.getint, 'display')
@@ -96,6 +98,36 @@ def load_config():
     except IOError as e:
         logger.error('Error with config file: {}'.format(str(e)))
         return default
+
+
+def ratio(astring):
+    """Validates the given parameter as being a valid ratio parameter for
+    the API. Used by the argument parser.
+
+    Args:
+        astring (string): A string that is supposed to be a ratio parameter
+
+    Raises:
+        ValueError: raised if the given string is not a ratio parameter
+
+    Returns:
+        string: the original string if it's a valid one
+    """
+    if not astring:
+        return astring
+
+    split = astring.split('x')
+    if len(split) != 2:
+        logger.error(astring + ' is not a valid parameter')
+        raise ValueError
+    else:
+        try:
+            int(split[0])
+            int(split[1])
+        except Exception:
+            logger.error(astring + ' is not a valid parameter')
+            raise ValueError
+    return astring
 
 
 def toprange(astring):
@@ -239,6 +271,10 @@ def parse_args():
         help='Values: 1920x1080 (anything x anything)'
     )
     parser.add_argument(
+        '-r', '--ratio', type=ratio, default=config['ratio'],
+        help='Values: None, or 16x9, 16x10, ... (anything x anything)'
+    )
+    parser.add_argument(
         '-c', '--categories', type=filters, default=config['categories'],
         help='Values: 100, 110, 111 (general|anime|people), on(1) off(0)'
     )
@@ -258,11 +294,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_wallpaper():
+def get_wallpaper(args):
     """Get link of the wallpaper corresponding to the given arguments. Uses
     https://wallhaven.cc/help/api.
 
     Stops the program if no images were found.
+
+    Params:
+        dict: the arguments (config)
 
     Returns:
         string: the wallpaper url
@@ -270,12 +309,13 @@ def get_wallpaper():
 
     url = (
         'https://wallhaven.cc/api/v1/search?' +
-        'sorting=' + config['sorting'] + '&' +
-        'topRange=' + config['toprange'] + '&' +
-        'purity=' + config['purity'] + '&' +
-        'atleast=' + config['atleast'] + '&' +
-        'categories=' + config['categories'] + '&' +
-        'order=' + config['order']
+        'sorting=' + args.sorting + '&' +
+        'topRange=' + args.toprange + '&' +
+        'purity=' + args.purity + '&' +
+        'atleast=' + args.atleast + '&' +
+        (('ratio=' + args.ratio + '&') if args.ratio else '') +
+        'categories=' + args.categories + '&' +
+        'order=' + args.order
     )
 
     response = requests.get(url)
@@ -382,7 +422,7 @@ if __name__ == '__main__':
     supported_linux_desktop_envs = ['gnome', 'mate', 'kde', 'lubuntu', 'i3']
 
     # Get top image link
-    image_url = get_wallpaper()
+    image_url = get_wallpaper(args)
 
     # Image info
     image_id = image_url.split('/')[-1].split('.')[0]
