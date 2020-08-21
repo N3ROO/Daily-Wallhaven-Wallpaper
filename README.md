@@ -39,17 +39,15 @@ Simply run:
 python /path_to_file/change_wallpaper_wallhaven.py
 ```
 
-There are few optional parameters than you can visualize by typing 
+There are few optional parameters than you can visualize by typing
 
 ```
 python /path_to_file/change_wallpaper_wallhaven.py -h
 ```
 
-After running the script once, a file called `change_wallpaper_haven.rc` will be created in `~/.config/`. You can customize all the settings here. Use the `-h` option to see all the valid parameters.
+After running the script once, a file called `change_wallpaper_haven.rc` will be created in the same directory has the python file. You can customize all the settings here. Use the command above option to see all the valid parameters.
 
 The files are automatically saved to `~/Pictures/Wallpapers`. You can also change that in the config file (or by using the `-o` parameter).
-
-**Note:** NSFW is currently not working because you need to provide an API key. If NSFW is turned on, it will allow SFW and Sketchy wallpapers will be shown (not NSFW, will implement that feature later on).
 
 Running on startup
 =======
@@ -106,15 +104,20 @@ Look into using cronjobs on Linux or Task Scheduler on Windows for performing th
 Configuration file
 =======
 
-Instead of writing arguments every time you run the script, you can also use configuration file which should be located at ```~/.config/change_wallpaper_haven.rc```.
+Instead of writing arguments every time you run the script, you can also use configuration file which should be located in the same diretory as the python file `./change_wallpaper_haven.rc`. **You need to run the script at least once for the config file to be created**
 
 Example of configuration file:
 
 ```
 [DEFAULT]
-nsfw = False
 sorting = toplist
-toprange = 1y
+toprange = 1d
+order = desc
+atleast = 1920x1080
+categories = 100
+purity = 100
 display = 0
-output = F:\Library\Pictures\wallpaper
+output = ~/Pictures/Wallpapers
 ```
+
+**Note:** You need to provide an API key to enable NSFW wallpapers.
