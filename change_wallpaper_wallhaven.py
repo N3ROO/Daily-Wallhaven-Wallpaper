@@ -313,7 +313,7 @@ def get_wallpaper(args):
         'topRange=' + args.toprange + '&' +
         'purity=' + args.purity + '&' +
         'atleast=' + args.atleast + '&' +
-        (('ratio=' + args.ratio + '&') if args.ratio else '') +
+        (('ratios=' + args.ratio + '&') if args.ratio else '') +
         'categories=' + args.categories + '&' +
         'order=' + args.order
     )
