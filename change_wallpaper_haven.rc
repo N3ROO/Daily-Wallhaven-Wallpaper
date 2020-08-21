@@ -1,0 +1,10 @@
+[DEFAULT]
+sorting = toplist
+toprange = 1d
+order = desc
+atleast = 1920x1080
+categories = 100
+purity = 100
+display = 0
+output = ~/Pictures/Wallpapers
+

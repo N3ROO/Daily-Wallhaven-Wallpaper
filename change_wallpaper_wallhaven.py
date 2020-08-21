@@ -35,7 +35,7 @@ def load_config():
     default['display'] = '0'
     default['output'] = '~/Pictures/Wallpapers'
 
-    config_path = os.path.expanduser('~/.config/change_wallpaper_haven.rc')
+    config_path = './change_wallpaper_haven.rc'
     section_name = 'root'
     try:
         config = ConfigParser(default)
@@ -170,19 +170,19 @@ def parse_args():
         help='Values: 1d, 3d, 1w, 1M, 3M, 6M, 1y'
     )
     parser.add_argument(
-        '-or', '--order', type=order, default=config['toprange'],
+        '-or', '--order', type=order, default=config['order'],
         help='Values: desc, asc'
     )
     parser.add_argument(
-        '-al', '--atleast', type=atleast, default=config['toprange'],
+        '-al', '--atleast', type=atleast, default=config['atleast'],
         help='Values: 1920x1080 (anything x anything)'
     )
     parser.add_argument(
-        '-c', '--categories', type=filters, default=config['toprange'],
+        '-c', '--categories', type=filters, default=config['categories'],
         help='Values: 100, 110, 111 (general|anime|people), on(1) off(0)'
     )
     parser.add_argument(
-        '-p', '--purity', type=filters, default=config['toprange'],
+        '-p', '--purity', type=filters, default=config['purity'],
         help='Values: 100, 110, 111 (sfw|sketchy|nsfw), on(1) off(0)'
     )
     parser.add_argument(
