@@ -35,7 +35,7 @@ def load_config():
     default['display'] = '0'
     default['output'] = '~/Pictures/Wallpapers'
 
-    config_path = './change_wallpaper_haven.rc'
+    config_path = os.getcwd() + '/change_wallpaper_haven.rc'
     section_name = 'root'
     try:
         config = ConfigParser(default)
