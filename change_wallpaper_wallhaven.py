@@ -369,7 +369,8 @@ if __name__ == '__main__':
 
     # File logging
     filename = 'latest_log.log'
-    file_handler = RotatingFileHandler(filename, 'a', encoding="UTF-8")
+    file_handler = RotatingFileHandler(
+        filename, 'w', encoding="UTF-8")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
